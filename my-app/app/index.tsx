@@ -2,7 +2,8 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { Link, Stack } from 'expo-router';
-import { Wifi, WifiOff } from 'lucide-react-native';
+import { RefreshCcw, Wifi, WifiOff } from 'lucide-react-native';
+import { useState } from 'react';
 import { ScrollView, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -23,11 +24,6 @@ const SUMMARY = {
   remaining: 98,
 };
 
-const syncState = {
-  isOnline: true,
-  lastSync: new Date(),
-};
-
 function formatSyncTime(date: Date) {
   return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
@@ -36,6 +32,19 @@ export default function DashboardScreen() {
   const { width } = useWindowDimensions();
   const metricTextSize = width > 420 ? 'text-4xl' : 'text-3xl';
   const breakdownTextSize = width > 420 ? 'text-4xl' : 'text-3xl';
+  const [isOnline] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState(new Date());
+
+  const runManualSync = () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    // Placeholder sync behavior until database integration is wired.
+    setTimeout(() => {
+      setLastSync(new Date());
+      setIsSyncing(false);
+    }, 900);
+  };
 
   return (
     <>
@@ -45,16 +54,21 @@ export default function DashboardScreen() {
           <View className="border-b border-border px-5 pb-4 pt-2">
             <View className="mb-4 flex-row items-center justify-between">
               <Text className="text-3xl font-bold text-foreground">BikePark Dashboard</Text>
-              <View className="flex-row items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1.5">
-                {syncState.isOnline ? (
+              <Button
+                variant="outline"
+                className="h-10 flex-row items-center gap-2 rounded-full px-3"
+                onPress={runManualSync}
+                disabled={isSyncing}>
+                {isOnline ? (
                   <Icon as={Wifi} size={14} className="text-emerald-600" />
                 ) : (
                   <Icon as={WifiOff} size={14} className="text-destructive" />
                 )}
+                <Icon as={RefreshCcw} size={14} className={isSyncing ? 'text-primary' : 'text-muted-foreground'} />
                 <Text className="text-xs font-medium text-muted-foreground">
-                  {formatSyncTime(syncState.lastSync)}
+                  {isSyncing ? 'Syncing...' : `Sync ${formatSyncTime(lastSync)}`}
                 </Text>
-              </View>
+              </Button>
             </View>
 
             <View className="flex-row gap-3">
