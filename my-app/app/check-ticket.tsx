@@ -4,7 +4,7 @@ import { Text } from '@/components/ui/text';
 import { Stack, router } from 'expo-router';
 import { ChevronLeft, Pencil, RefreshCcw, Search, Ticket, Trash2 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type DropOffRecord = {
@@ -72,6 +72,7 @@ export default function CheckTicketScreen() {
   const [lastRefresh, setLastRefresh] = useState<string | null>(null);
   const [recordToEdit, setRecordToEdit] = useState<DropOffRecord | null>(null);
   const [notesDraft, setNotesDraft] = useState('');
+  const [recordToDelete, setRecordToDelete] = useState<DropOffRecord | null>(null);
 
   const filteredRecords = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -107,16 +108,12 @@ export default function CheckTicketScreen() {
     setNotesDraft('');
   };
 
-  const deleteRecord = (record: DropOffRecord) => {
-    Alert.alert('Delete Record', `Delete ticket ${record.ticketNumber}?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () =>
-          setRecords((current) => current.filter((currentRecord) => currentRecord.id !== record.id)),
-      },
-    ]);
+  const confirmDeleteRecord = () => {
+    if (!recordToDelete) return;
+    setRecords((current) =>
+      current.filter((currentRecord) => currentRecord.id !== recordToDelete.id)
+    );
+    setRecordToDelete(null);
   };
 
   return (
@@ -182,7 +179,7 @@ export default function CheckTicketScreen() {
                       <Button
                         variant="destructive"
                         className="h-9 px-3"
-                        onPress={() => deleteRecord(record)}>
+                        onPress={() => setRecordToDelete(record)}>
                         <Icon as={Trash2} size={14} className="text-white" />
                         <Text>Delete</Text>
                       </Button>
@@ -212,6 +209,13 @@ export default function CheckTicketScreen() {
             setNotesDraft('');
           }}
           onSave={saveNotes}
+        />
+
+        <DeleteConfirmModal
+          visible={!!recordToDelete}
+          ticketNumber={recordToDelete?.ticketNumber ?? null}
+          onCancel={() => setRecordToDelete(null)}
+          onConfirm={confirmDeleteRecord}
         />
       </SafeAreaView>
     </>
@@ -272,6 +276,36 @@ function EditNotesModal({
             </Button>
             <Button className="h-12 flex-1" onPress={onSave}>
               <Text>Save Notes</Text>
+            </Button>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+type DeleteConfirmModalProps = {
+  visible: boolean;
+  ticketNumber: string | null;
+  onCancel: () => void;
+  onConfirm: () => void;
+};
+
+function DeleteConfirmModal({ visible, ticketNumber, onCancel, onConfirm }: DeleteConfirmModalProps) {
+  return (
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onCancel}>
+      <View className="flex-1 items-center justify-center bg-black/40 px-5">
+        <View className="w-full rounded-xl border border-border bg-card p-6">
+          <Text className="text-xl font-semibold text-foreground">Delete Record</Text>
+          <Text className="mt-2 text-muted-foreground">
+            Delete ticket {ticketNumber ?? 'N/A'}? This action cannot be undone.
+          </Text>
+          <View className="mt-6 flex-row gap-3">
+            <Button variant="outline" className="h-12 flex-1" onPress={onCancel}>
+              <Text>Cancel</Text>
+            </Button>
+            <Button variant="destructive" className="h-12 flex-1" onPress={onConfirm}>
+              <Text>Delete</Text>
             </Button>
           </View>
         </View>
