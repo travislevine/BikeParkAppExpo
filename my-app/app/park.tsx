@@ -118,6 +118,7 @@ export default function ParkScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<string | null>(null);
   const [editingPatron, setEditingPatron] = useState<Patron | null>(null);
+  const [patronToDelete, setPatronToDelete] = useState<Patron | null>(null);
   const [blankEntry, setBlankEntry] = useState<FormState>(EMPTY_FORM);
 
   const filteredPatrons = useMemo(() => {
@@ -143,15 +144,10 @@ export default function ParkScreen() {
     setEditingPatron(null);
   };
 
-  const deletePatron = (patron: Patron) => {
-    Alert.alert('Delete Patron', `Delete ${patron.name}?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => setPatrons((current) => current.filter((p) => p.id !== patron.id)),
-      },
-    ]);
+  const confirmDeletePatron = () => {
+    if (!patronToDelete) return;
+    setPatrons((current) => current.filter((p) => p.id !== patronToDelete.id));
+    setPatronToDelete(null);
   };
 
   const refreshPatrons = () => {
@@ -266,7 +262,10 @@ export default function ParkScreen() {
                           <Icon as={Pencil} size={14} className="text-foreground" />
                           <Text>Edit</Text>
                         </Button>
-                        <Button variant="destructive" className="h-10 flex-1" onPress={() => deletePatron(patron)}>
+                        <Button
+                          variant="destructive"
+                          className="h-10 flex-1"
+                          onPress={() => setPatronToDelete(patron)}>
                           <Icon as={Trash2} size={14} className="text-white" />
                           <Text>Delete</Text>
                         </Button>
@@ -390,6 +389,13 @@ export default function ParkScreen() {
           onClose={() => setEditingPatron(null)}
           onSave={saveEditedPatron}
           onChange={setEditingPatron}
+        />
+
+        <DeletePatronConfirmModal
+          visible={!!patronToDelete}
+          patronName={patronToDelete?.name ?? null}
+          onCancel={() => setPatronToDelete(null)}
+          onConfirm={confirmDeletePatron}
         />
       </SafeAreaView>
     </>
@@ -537,6 +543,41 @@ function EditPatronModal({ patron, onClose, onSave, onChange }: EditModalProps) 
             </Button>
             <Button className="h-12 flex-1" onPress={onSave}>
               <Text>Save</Text>
+            </Button>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+type DeletePatronConfirmModalProps = {
+  visible: boolean;
+  patronName: string | null;
+  onCancel: () => void;
+  onConfirm: () => void;
+};
+
+function DeletePatronConfirmModal({
+  visible,
+  patronName,
+  onCancel,
+  onConfirm,
+}: DeletePatronConfirmModalProps) {
+  return (
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onCancel}>
+      <View className="flex-1 items-center justify-center bg-black/40 px-5">
+        <View className="w-full rounded-xl border border-border bg-card p-6">
+          <Text className="text-xl font-semibold text-foreground">Delete Patron</Text>
+          <Text className="mt-2 text-muted-foreground">
+            Delete {patronName ?? 'this patron'}? This action cannot be undone.
+          </Text>
+          <View className="mt-6 flex-row gap-3">
+            <Button variant="outline" className="h-12 flex-1" onPress={onCancel}>
+              <Text>Cancel</Text>
+            </Button>
+            <Button variant="destructive" className="h-12 flex-1" onPress={onConfirm}>
+              <Text>Delete</Text>
             </Button>
           </View>
         </View>
