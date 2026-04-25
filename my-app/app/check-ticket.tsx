@@ -1,72 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { type DropOffRecord, useAppData } from '@/lib/app-data-context';
 import { Stack, router } from 'expo-router';
 import { ChevronLeft, Pencil, RefreshCcw, Search, Ticket, Trash2 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-type DropOffRecord = {
-  id: string;
-  ticketNumber: string;
-  patronName: string;
-  devicesTotal: number;
-  devicesRemaining: number;
-  notes?: string;
-  timestamp: Date;
-};
-
-const INITIAL_RECORDS: DropOffRecord[] = [
-  {
-    id: 'dor-1',
-    ticketNumber: '2001',
-    patronName: 'Alice Thompson',
-    devicesTotal: 3,
-    devicesRemaining: 1,
-    notes: 'One bike still in rack',
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
-  },
-  {
-    id: 'dor-2',
-    ticketNumber: '2002',
-    patronName: 'Bob Wilson',
-    devicesTotal: 2,
-    devicesRemaining: 2,
-    notes: '',
-    timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
-  },
-  {
-    id: 'dor-3',
-    ticketNumber: '2003',
-    patronName: 'Carol Martinez',
-    devicesTotal: 4,
-    devicesRemaining: 0,
-    notes: 'All devices picked up',
-    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000),
-  },
-  {
-    id: 'dor-4',
-    ticketNumber: '2004',
-    patronName: 'David Lee',
-    devicesTotal: 1,
-    devicesRemaining: 1,
-    notes: 'Waiting for pickup',
-    timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
-  },
-  {
-    id: 'dor-5',
-    ticketNumber: '2005',
-    patronName: 'Eva Johansson',
-    devicesTotal: 2,
-    devicesRemaining: 0,
-    notes: 'Picked up this morning',
-    timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
-  },
-];
-
 export default function CheckTicketScreen() {
-  const [records, setRecords] = useState<DropOffRecord[]>(INITIAL_RECORDS);
+  const { dropOffRecords: records, setDropOffRecords: setRecords } = useAppData();
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<string | null>(null);

@@ -1,72 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { type ParkedDevice, useAppData } from '@/lib/app-data-context';
 import { Stack, router } from 'expo-router';
 import { Check, ChevronLeft, Search, Ticket } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-type ParkedDevice = {
-  id: string;
-  patronId: string;
-  ticketNumber: string;
-  patronName: string;
-  mobile: string;
-  devicesRemaining: number;
-  parkedAt: Date;
-};
-
-const INITIAL_PARKED_DEVICES: ParkedDevice[] = [
-  {
-    id: 'pd-1',
-    patronId: '1',
-    ticketNumber: '1001',
-    patronName: 'John Smith',
-    mobile: '555-0101',
-    devicesRemaining: 2,
-    parkedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-  {
-    id: 'pd-2',
-    patronId: '2',
-    ticketNumber: '1002',
-    patronName: 'Sarah Johnson',
-    mobile: '555-0102',
-    devicesRemaining: 1,
-    parkedAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
-  },
-  {
-    id: 'pd-3',
-    patronId: '3',
-    ticketNumber: '1003',
-    patronName: 'Michael Chen',
-    mobile: '555-0103',
-    devicesRemaining: 3,
-    parkedAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
-  },
-  {
-    id: 'pd-4',
-    patronId: '4',
-    ticketNumber: '1004',
-    patronName: 'Emma Davis',
-    mobile: '555-0104',
-    devicesRemaining: 2,
-    parkedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
-  },
-  {
-    id: 'pd-5',
-    patronId: '5',
-    ticketNumber: '1005',
-    patronName: 'Lucas Rodriguez',
-    mobile: '555-0105',
-    devicesRemaining: 1,
-    parkedAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
-  },
-];
-
 export default function PickupScreen() {
-  const [devices, setDevices] = useState<ParkedDevice[]>(INITIAL_PARKED_DEVICES);
+  const { parkedDevices: devices, setParkedDevices: setDevices, setDropOffRecords } = useAppData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDevice, setSelectedDevice] = useState<ParkedDevice | null>(null);
   const [devicesPickedUp, setDevicesPickedUp] = useState(1);
@@ -110,6 +53,13 @@ export default function PickupScreen() {
         )
       );
     }
+    setDropOffRecords((current) =>
+      current.map((record) =>
+        record.ticketNumber === selectedDevice.ticketNumber
+          ? { ...record, devicesRemaining: Math.max(remaining, 0) }
+          : record
+      )
+    );
 
     closePickupModal();
     setShowSuccess(true);

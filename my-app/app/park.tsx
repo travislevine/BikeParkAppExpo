@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
+import { COLORS, DEVICE_TYPES, type BlankEntryInput, type Patron, useAppData } from '@/lib/app-data-context';
 import { Stack, router } from 'expo-router';
 import {
   Check,
@@ -25,80 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ViewMode = 'selection' | 'preregistered' | 'blankentry' | 'success';
 
-type Patron = {
-  id: string;
-  ticketNumber: string;
-  name: string;
-  mobile: string;
-  email: string;
-  numDevices: number;
-  deviceType: string;
-  color: string;
-  notes?: string;
-};
-
-type FormState = Omit<Patron, 'id'>;
-
-const DEVICE_TYPES = ['Bike', 'eBike', 'Scooter', 'Skateboard'];
-const COLORS = ['Red', 'Blue', 'Black', 'Green', 'Yellow', 'White', 'Orange', 'Purple'];
-
-const INITIAL_PATRONS: Patron[] = [
-  {
-    id: '1',
-    ticketNumber: 'BK101',
-    name: 'Alex Chen',
-    mobile: '0401234567',
-    email: 'alex@example.com',
-    numDevices: 2,
-    deviceType: 'Bike',
-    color: 'Black',
-    notes: 'Road bikes',
-  },
-  {
-    id: '2',
-    ticketNumber: 'BK102',
-    name: 'Jamie Lee',
-    mobile: '0402234567',
-    email: 'jamie@example.com',
-    numDevices: 1,
-    deviceType: 'eBike',
-    color: 'Blue',
-    notes: '',
-  },
-  {
-    id: '3',
-    ticketNumber: 'BK103',
-    name: 'Morgan Diaz',
-    mobile: '0403234567',
-    email: 'morgan@example.com',
-    numDevices: 3,
-    deviceType: 'Scooter',
-    color: 'Red',
-    notes: 'Family group',
-  },
-  {
-    id: '4',
-    ticketNumber: 'BK104',
-    name: 'Taylor Singh',
-    mobile: '0404234567',
-    email: 'taylor@example.com',
-    numDevices: 1,
-    deviceType: 'Skateboard',
-    color: 'White',
-    notes: '',
-  },
-  {
-    id: '5',
-    ticketNumber: 'BK105',
-    name: 'Jordan Kim',
-    mobile: '0405234567',
-    email: 'jordan@example.com',
-    numDevices: 2,
-    deviceType: 'Bike',
-    color: 'Green',
-    notes: '',
-  },
-];
+type FormState = BlankEntryInput;
 
 const EMPTY_FORM: FormState = {
   ticketNumber: '',
@@ -113,7 +41,7 @@ const EMPTY_FORM: FormState = {
 
 export default function ParkScreen() {
   const [viewMode, setViewMode] = useState<ViewMode>('selection');
-  const [patrons, setPatrons] = useState<Patron[]>(INITIAL_PATRONS);
+  const { patrons, setPatrons, addBlankEntry } = useAppData();
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<string | null>(null);
@@ -163,6 +91,7 @@ export default function ParkScreen() {
       Alert.alert('Missing required fields', 'Ticket number and device type are required.');
       return;
     }
+    addBlankEntry(blankEntry);
     setViewMode('success');
   };
 
