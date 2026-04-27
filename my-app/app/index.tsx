@@ -25,7 +25,7 @@ const SUMMARY = {
 };
 
 function formatSyncTime(date: Date) {
-  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString('en-US', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
 export default function DashboardScreen() {
@@ -53,18 +53,18 @@ export default function DashboardScreen() {
         <View className="flex-1 bg-background">
           <View className="border-b border-border px-5 pb-4 pt-2">
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-3xl font-bold text-foreground">BikePark Dashboard</Text>
+              <Text className="text-3xl font-bold text-foreground">Dashboard</Text>
               <Button
                 variant="outline"
                 className="h-10 flex-row items-center gap-2 rounded-full px-3"
                 onPress={runManualSync}
                 disabled={isSyncing}>
                 {isOnline ? (
-                  <Icon as={Wifi} size={14} className="text-emerald-600" />
+                  <Icon as={Wifi} size={20} className="text-emerald-600" />
                 ) : (
-                  <Icon as={WifiOff} size={14} className="text-destructive" />
+                  <Icon as={WifiOff} size={20} className="text-destructive" />
                 )}
-                <Icon as={RefreshCcw} size={14} className={isSyncing ? 'text-primary' : 'text-muted-foreground'} />
+                <Icon as={RefreshCcw} size={15} className={isSyncing ? 'text-primary' : 'text-muted-foreground'} />
                 <Text className="text-xs font-medium text-muted-foreground">
                   {isSyncing ? 'Syncing...' : `Sync ${formatSyncTime(lastSync)}`}
                 </Text>
